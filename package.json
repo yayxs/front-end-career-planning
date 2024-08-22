@@ -1,17 +1,21 @@
 {
+  "name": "map-app",
+  "private": true,
+  "version": "1.0.0",
   "scripts": {
-    "dev": "astro dev"
+    "build": "rsbuild build",
+    "check": "biome check --write",
+    "dev": "rsbuild dev --open",
+    "format": "biome format --write",
+    "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@astrojs/mdx": "^3.1.2",
-    "astro": "^4.11.5"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "eslint": "^9.6.0",
-    "eslint-plugin-astro": "^1.2.3",
-    "postcss-html": "^1.7.0",
-    "prettier": "^3.3.2",
-    "prettier-plugin-astro": "^0.14.0",
-    "stylelint-config-html": "^1.1.0"
+    "@biomejs/biome": "^1.8.3",
+    "@rsbuild/core": "1.0.1-beta.15",
+    "@rsbuild/plugin-react": "1.0.1-beta.15"
   }
 }
