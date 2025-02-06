@@ -1,101 +1,117 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import useSWR from 'swr';
+import { StarIcon } from '@heroicons/react/24/solid';
+import { twMerge } from 'tailwind-merge';
+
+interface Repository {
+  name: string;
+  fullName: string;
+  description: string;
+  stars: number;
+  url: string;
+  language: string;
+  owner: {
+    login: string;
+    avatarUrl: string;
+  };
+  updatedAt: string;
+}
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { data: repos, error, isLoading } = useSWR<Repository[]>('/api/github', fetcher);
+  const [sortBy, setSortBy] = useState<'stars' | 'name'>('stars');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  if (error) return <div className="text-center text-red-500">Failed to load</div>;
+  if (isLoading) return <div className="text-center">Loading...</div>;
+
+  const sortedRepos = [...(repos || [])].sort((a, b) => {
+    if (sortBy === 'stars') {
+      return b.stars - a.stars;
+    }
+    return a.name.localeCompare(b.name);
+  });
+
+  return (
+    <main className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
+        <div className="text-center">
+          <h1 className="mb-8 text-4xl font-bold text-gray-900">Frontend Projects Star Ranking</h1>
+          <div className="mb-6">
+            <button
+              onClick={() => setSortBy('stars')}
+              className={twMerge(
+                'rounded-l-md px-4 py-2',
+                sortBy === 'stars'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              )}
+            >
+              Sort by Stars
+            </button>
+            <button
+              onClick={() => setSortBy('name')}
+              className={twMerge(
+                'rounded-r-md px-4 py-2',
+                sortBy === 'name'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              )}
+            >
+              Sort by Name
+            </button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        <div className="mt-12 space-y-4">
+          {sortedRepos.map((repo, index) => (
+            <div
+              key={repo.fullName}
+              className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center">
+                  <div className="flex h-8 w-8 items-center justify-center font-semibold text-gray-500">
+                    #{index + 1}
+                  </div>
+                  <img
+                    src={repo.owner.avatarUrl}
+                    alt={repo.owner.login}
+                    className="ml-2 h-10 w-10 rounded-full"
+                  />
+                  <div className="ml-4">
+                    <h2 className="text-xl font-semibold">
+                      <a
+                        href={repo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {repo.name}
+                      </a>
+                    </h2>
+                    <p className="text-sm text-gray-500">by {repo.owner.login}</p>
+                  </div>
+                </div>
+                <div className="flex items-center text-yellow-500">
+                  <StarIcon className="h-5 w-5" />
+                  <span className="ml-1 font-semibold">
+                    {new Intl.NumberFormat().format(repo.stars)}
+                  </span>
+                </div>
+              </div>
+              <p className="mt-4 text-gray-600">{repo.description}</p>
+              <div className="mt-4 flex items-center text-sm text-gray-500">
+                <span className="mr-4">Language: {repo.language}</span>
+                <span>Updated: {new Date(repo.updatedAt).toLocaleDateString()}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
   );
 }
