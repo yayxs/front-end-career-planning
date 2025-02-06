@@ -30,6 +30,7 @@ interface RepoData {
 const FRONTEND_REPOS: RepoInfo[] = [
   { repo: 'vercel/next.js', category: 'Meta-Frameworks' },
   { repo: 'withastro/astro', category: 'Meta-Frameworks' },
+  { repo: 'nuxt/nuxt', category: 'Meta-Frameworks' },
 ];
 
 export async function GET() {
